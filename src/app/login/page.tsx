@@ -1,0 +1,68 @@
+"use client";
+import Link from "next/link";
+import React, { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import axios  from "axios";
+import { toast } from "react-hot-toast";
+
+export default function LoginPage() {
+    const router = useRouter();
+  const [user, setUser] = useState({
+    email: "",
+    password: "",
+  });
+  const [buttonDisabled, setButtonDisabled] = React.useState(false);
+  const[loading, setLoading] = React.useState(false);
+
+  const onLogin = async () => {
+    try {
+        setLoading(true);
+        const response = await axios.post("/api/users/login", user);    
+        console.log("Login Successful",response.data);
+        toast.success("Login Success");
+        router.push("/profile");
+    } catch (error: any) {
+        console.log("Failed to login", error.message);
+        toast.error(error.message);
+    } finally{
+        setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    if(user.email.length >0 && user.password.length >0){
+        setButtonDisabled(false);
+    }else{
+        setButtonDisabled(true);    //true here means button is disabled    
+    }
+  }, [user])
+
+  return (
+    <div className="flex flex-col items-center justify-center min-h-screen py-2">
+      {loading ? "Procssing" : "Login"}
+      <hr />
+      <label htmlFor="email">email</label>
+      <input
+        className="p-2 border text-black"
+        id="email"
+        type="text"
+        value={user.email}
+        onChange={(e) => setUser({ ...user, email: e.target.value })}
+        placeholder="Enter email"   
+      />
+      <label htmlFor="password">password</label>
+      <input
+        className="p-2 border text-black"
+        id="password"
+        type="password"
+        value={user.password}
+        onChange={(e) => setUser({ ...user, password: e.target.value })}
+        placeholder="Enter password"
+      />
+      <button className="p-2 mt-4 border rounded-lg" onClick={onLogin}>
+        Login Here
+      </button>
+      <Link href="/signup">Visit SgnUp Page</Link>
+    </div>
+  );
+}
